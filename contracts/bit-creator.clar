@@ -515,3 +515,62 @@
     (ok true)
   )
 )
+
+(define-public (pause-contract)
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-UNAUTHORIZED)
+    (var-set contract-paused true)
+    (ok true)
+  )
+)
+
+(define-public (unpause-contract)
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-UNAUTHORIZED)
+    (var-set contract-paused false)
+    (ok true)
+  )
+)
+
+(define-public (emergency-withdraw (amount uint))
+  (begin
+    (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-UNAUTHORIZED)
+    (asserts! (> amount u0) ERR-INVALID-AMOUNT)
+    (asserts! (<= amount (stx-get-balance (as-contract tx-sender)))
+      ERR-INSUFFICIENT-BALANCE
+    )
+    (try! (as-contract (stx-transfer? amount tx-sender CONTRACT-OWNER)))
+    (ok true)
+  )
+)
+
+;; PROTOCOL INITIALIZATION
+
+;; Initialize default membership tier structure
+(map-set membership-tiers u1 {
+  tier-name: "Bronze Creator",
+  min-reputation: u1000,
+  benefits: "Basic creator tools and community access",
+  access-level: u1,
+})
+
+(map-set membership-tiers u2 {
+  tier-name: "Silver Creator",
+  min-reputation: u2000,
+  benefits: "Enhanced monetization tools + priority support",
+  access-level: u2,
+})
+
+(map-set membership-tiers u3 {
+  tier-name: "Gold Creator",
+  min-reputation: u5000,
+  benefits: "Premium features + governance participation",
+  access-level: u3,
+})
+
+(map-set membership-tiers u4 {
+  tier-name: "Platinum Creator",
+  min-reputation: u8000,
+  benefits: "Full protocol access + revenue sharing rights",
+  access-level: u4,
+})
